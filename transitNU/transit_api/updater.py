@@ -8,10 +8,14 @@ UPDATE_INTERVAL_STOP =  86400 # daily
 UPDATE_INTERVAL_LINE = 86400 # daily
 UPDATE_INTERVAL_TRAIN =  15 # 15 seconds
 
+
+# UPDATE_INTERVAL_STOP =  15# daily
+# UPDATE_INTERVAL_LINE = 15 # daily
+# UPDATE_INTERVAL_TRAIN =  86400 # 15 seconds
+
 UPDATE_LINE_INFO_LAST_MOD = None
 UDPATE_STOP_INFO_LAST_MOD = None
-UPDATE_TRAIN_INFO_LAST_MOD1 = None 
-UPDATE_TRAIN_INFO_LAST_MOD2 = None
+UPDATE_TRAIN_INFO_LAST_MOD = None
 
 def start():
     def transit_listener(event):
@@ -27,16 +31,15 @@ def start():
                 last_modified = update_stop_info(UDPATE_STOP_INFO_LAST_MOD)
                 UDPATE_STOP_INFO_LAST_MOD = last_modified
             if (job.name == 'update_train_info'):
-                global UPDATE_TRAIN_INFO_LAST_MOD1
-                global UPDATE_TRAIN_INFO_LAST_MOD2
-                last_modified1, last_modified2 = update_train_info(UPDATE_TRAIN_INFO_LAST_MOD1, UPDATE_TRAIN_INFO_LAST_MOD2)
-                UPDATE_TRAIN_INFO_LAST_MOD1, UPDATE_TRAIN_INFO_LAST_MOD2 = last_modified1, last_modified2
+                global UPDATE_TRAIN_INFO_LAST_MOD
+                last_modified = update_train_info(UPDATE_TRAIN_INFO_LAST_MOD)
+                UPDATE_TRAIN_INFO_LAST_MOD = last_modified
 
     scheduler = BackgroundScheduler(job_defaults={"max_instances": 20})
     scheduler.add_listener(transit_listener, EVENT_JOB_EXECUTED | EVENT_JOB_ERROR)
     scheduler.add_job(update_line_info, 'interval', args=[UPDATE_LINE_INFO_LAST_MOD], seconds=UPDATE_INTERVAL_LINE)
     scheduler.add_job(update_stop_info, 'interval', args=[UDPATE_STOP_INFO_LAST_MOD], seconds=UPDATE_INTERVAL_STOP)
-    scheduler.add_job(update_train_info, 'interval', args=[UPDATE_TRAIN_INFO_LAST_MOD1, UPDATE_TRAIN_INFO_LAST_MOD2], seconds=UPDATE_INTERVAL_TRAIN)
+    scheduler.add_job(update_train_info, 'interval', args=[UPDATE_TRAIN_INFO_LAST_MOD], seconds=UPDATE_INTERVAL_TRAIN)
     scheduler.start()
 
 
